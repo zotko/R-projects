@@ -1764,16 +1764,42 @@ library(readr)
 <p>Read preproceseed NYC schools data, <a href="https://data.cityofnewyork.us/Education/2011-NYC-School-Survey/mnz3-dyi8">servey data</a> for all community schools and for all District 75 schools.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY29tbXVuaXR5IDwtICByZWFkX3RzdignZGF0YS9tYXN0ZXJmaWxlMTFfZ2VuZWRfZmluYWwudHh0JylcbmRpc3RyaWN0NzUgPC0gcmVhZF90c3YoJ2RhdGEvbWFzdGVyZmlsZTExX2Q3NV9maW5hbC50eHQnKVxuXG5gYGAifQ== -->
-<pre class="r"><code>community &lt;-  read_tsv('data/masterfile11_gened_final.txt')
-district75 &lt;- read_tsv('data/masterfile11_d75_final.txt')
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY29tYmluZWQgPC0gIHJlYWRfY3N2KCdkYXRhL2NvbWJpbmVkLmNzdicpXG5zdXJ2ZXkgPC0gIHJlYWRfdHN2KCdkYXRhL21hc3RlcmZpbGUxMV9nZW5lZF9maW5hbC50eHQnKVxuc3VydmV5X2Q3NSA8LSByZWFkX3RzdignZGF0YS9tYXN0ZXJmaWxlMTFfZDc1X2ZpbmFsLnR4dCcpXG5cbmBgYCJ9 -->
+<pre class="r"><code>combined &lt;-  read_csv('data/combined.csv')
+survey &lt;-  read_tsv('data/masterfile11_gened_final.txt')
+survey_d75 &lt;- read_tsv('data/masterfile11_d75_final.txt')
 </code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<p>Filter <code>survey</code> data to include only high schools and select columns needed for analysis.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VydmV5IDwtIHN1cnZleSAlPiVcbiAgZmlsdGVyKHNjaG9vbHR5cGUgPT0gXCJIaWdoIFNjaG9vbFwiKSAlPiVcbiAgc2VsZWN0KGRibiwgc2Nob29sbmFtZSwgcnJfczpwX3EzYilcblxuYGBgIn0= -->
+<pre class="r"><code>survey &lt;- survey %&gt;%
+  filter(schooltype == &quot;High School&quot;) %&gt;%
+  select(dbn, schoolname, rr_s:p_q3b)
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Select columns needed for analysis from <code>survey_d75</code>.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VydmV5X2Q3NSA8LSBzdXJ2ZXlfZDc1ICU+JVxuICBzdWJzZXQoaXMubmEoaGlnaHNjaG9vbCkpICU+JVxuICBzZWxlY3QoZGJuLCBycl9zOnBfcTNjKVxuXG5gYGAifQ== -->
+<pre class="r"><code>survey_d75 &lt;- survey_d75 %&gt;%
+  subset(is.na(highschool)) %&gt;%
+  select(dbn, rr_s:p_q3c)
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiRXJyb3IgaW4gZXZhbChlLCB4LCBwYXJlbnQuZnJhbWUoKSkgOiBvYmplY3QgJ2hpZ2hzY2hvb2wnIG5vdCBmb3VuZFxuIn0= -->
+<pre><code>Error in eval(e, x, parent.frame()) : object 'highschool' not found</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiTllDIFNjaG9vbHMgUGVyY2VwdGlvbnMiCmF1dGhvcjogIk15a29sYSBab3RrbyIKZGF0YTogIkphbnVhcnkgMjAsIDIwMTkiCm91dHB1dDogaHRtbF9ub3RlYm9vawoKLS0tCgpJbiB0aGlzIHByb2plY3Qgd2Ugd2lsbCB3b3JrIHdpdGggZGF0YSBzZXRzIGZyb20gdGhlIFtOZXcgWW9yayBDaXR5IERlcGFydG1lbnQgb2YgRWR1Y2F0aW9uXShodHRwczovL3d3dy5zY2hvb2xzLm55Yy5nb3YvKS4gVGhleSBjb250YWluIGRhdGEgb24gTllDIHNjaG9vbHMsIGluY2x1ZGluZyBzdHVkZW50IGRlbW9ncmFwaGljcywgdGVzdCBzY29yZXMsIGdyYWR1YXRpb24gYW5kIGRyb3BvdXQgcmF0ZXMsIGFuZCBzY2hvb2wgbG9jYXRpb25zLgpXZSB3aWxsIGluY29ycG9yYXRlIHNvbWUgYWRkaXRpb25hbCBkYXRhIGZyb20gcmVzcG9uc2VzIHRvIHN1cnZleXMgZGVzaWduZWQgdG8gZ2F1Z2UgcGFyZW50LCBzdHVkZW50LCBhbmQgdGVhY2hlciBwZXJjZXB0aW9ucyBvZiB0aGUgcXVhbGl0eSBvZiBOZXcgWW9yayBDaXR5IHNjaG9vbHMuIAoKYGBge3IsIG1lc3NhZ2U9RkFMU0V9CmxpYnJhcnkoZHBseXIpCmxpYnJhcnkocmVhZHIpCgpgYGAKUmVhZCBwcmVwcm9jZXNlZWQgTllDIHNjaG9vbHMgZGF0YSwgW3NlcnZleSBkYXRhXShodHRwczovL2RhdGEuY2l0eW9mbmV3eW9yay51cy9FZHVjYXRpb24vMjAxMS1OWUMtU2Nob29sLVN1cnZleS9tbnozLWR5aTgpIGZvciBhbGwgY29tbXVuaXR5IHNjaG9vbHMgYW5kIGZvciBhbGwgRGlzdHJpY3QgNzUgc2Nob29scy4KCmBgYHtyLCBtZXNzYWdlPUZBTFNFfQpjb21iaW5lZCA8LSAgcmVhZF9jc3YoJ2RhdGEvY29tYmluZWQuY3N2JykKY29tbXVuaXR5IDwtICByZWFkX3RzdignZGF0YS9tYXN0ZXJmaWxlMTFfZ2VuZWRfZmluYWwudHh0JykKZGlzdHJpY3Q3NSA8LSByZWFkX3RzdignZGF0YS9tYXN0ZXJmaWxlMTFfZDc1X2ZpbmFsLnR4dCcpCgpgYGAKCg==</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiTllDIFNjaG9vbHMgUGVyY2VwdGlvbnMiCmF1dGhvcjogIk15a29sYSBab3RrbyIKZGF0YTogIkphbnVhcnkgMjAsIDIwMTkiCm91dHB1dDogaHRtbF9ub3RlYm9vawoKLS0tCgpJbiB0aGlzIHByb2plY3Qgd2Ugd2lsbCB3b3JrIHdpdGggZGF0YSBzZXRzIGZyb20gdGhlIFtOZXcgWW9yayBDaXR5IERlcGFydG1lbnQgb2YgRWR1Y2F0aW9uXShodHRwczovL3d3dy5zY2hvb2xzLm55Yy5nb3YvKS4gVGhleSBjb250YWluIGRhdGEgb24gTllDIHNjaG9vbHMsIGluY2x1ZGluZyBzdHVkZW50IGRlbW9ncmFwaGljcywgdGVzdCBzY29yZXMsIGdyYWR1YXRpb24gYW5kIGRyb3BvdXQgcmF0ZXMsIGFuZCBzY2hvb2wgbG9jYXRpb25zLgpXZSB3aWxsIGluY29ycG9yYXRlIHNvbWUgYWRkaXRpb25hbCBkYXRhIGZyb20gcmVzcG9uc2VzIHRvIHN1cnZleXMgZGVzaWduZWQgdG8gZ2F1Z2UgcGFyZW50LCBzdHVkZW50LCBhbmQgdGVhY2hlciBwZXJjZXB0aW9ucyBvZiB0aGUgcXVhbGl0eSBvZiBOZXcgWW9yayBDaXR5IHNjaG9vbHMuIAoKYGBge3IsIG1lc3NhZ2U9RkFMU0V9CmxpYnJhcnkoZHBseXIpCmxpYnJhcnkocmVhZHIpCgpgYGAKUmVhZCBwcmVwcm9jZXNlZWQgTllDIHNjaG9vbHMgZGF0YSwgW3NlcnZleSBkYXRhXShodHRwczovL2RhdGEuY2l0eW9mbmV3eW9yay51cy9FZHVjYXRpb24vMjAxMS1OWUMtU2Nob29sLVN1cnZleS9tbnozLWR5aTgpIGZvciBhbGwgY29tbXVuaXR5IHNjaG9vbHMgYW5kIGZvciBhbGwgRGlzdHJpY3QgNzUgc2Nob29scy4KCmBgYHtyLCBtZXNzYWdlPUZBTFNFfQpjb21iaW5lZCA8LSAgcmVhZF9jc3YoJ2RhdGEvY29tYmluZWQuY3N2JykKc3VydmV5IDwtICByZWFkX3RzdignZGF0YS9tYXN0ZXJmaWxlMTFfZ2VuZWRfZmluYWwudHh0JykKc3VydmV5X2Q3NSA8LSByZWFkX3RzdignZGF0YS9tYXN0ZXJmaWxlMTFfZDc1X2ZpbmFsLnR4dCcpCgpgYGAKCkZpbHRlciBgc3VydmV5YCBkYXRhIHRvIGluY2x1ZGUgb25seSBoaWdoIHNjaG9vbHMgYW5kIHNlbGVjdCBjb2x1bW5zIG5lZWRlZCBmb3IgYW5hbHlzaXMuCgpgYGB7cn0Kc3VydmV5IDwtIHN1cnZleSAlPiUKICBmaWx0ZXIoc2Nob29sdHlwZSA9PSAiSGlnaCBTY2hvb2wiKSAlPiUKICBzZWxlY3QoZGJuLCBzY2hvb2xuYW1lLCBycl9zOnBfcTNiKQoKYGBgClNlbGVjdCBjb2x1bW5zIG5lZWRlZCBmb3IgYW5hbHlzaXMgZnJvbSBgc3VydmV5X2Q3NWAuCgpgYGB7cn0Kc3VydmV5X2Q3NSA8LSBzdXJ2ZXlfZDc1ICU+JQogIHN1YnNldChpcy5uYShoaWdoc2Nob29sKSkgJT4lCiAgc2VsZWN0KGRibiwgcnJfczpwX3EzYykKYGBgCgo=</div>
 
 
 

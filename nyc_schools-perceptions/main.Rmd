@@ -18,8 +18,24 @@ Read preproceseed NYC schools data, [servey data](https://data.cityofnewyork.us/
 
 ```{r, message=FALSE}
 combined <-  read_csv('data/combined.csv')
-community <-  read_tsv('data/masterfile11_gened_final.txt')
-district75 <- read_tsv('data/masterfile11_d75_final.txt')
+survey <-  read_tsv('data/masterfile11_gened_final.txt')
+survey_d75 <- read_tsv('data/masterfile11_d75_final.txt')
 
+```
+
+Filter `survey` data to include only high schools and select columns needed for analysis.
+
+```{r}
+survey <- survey %>%
+  filter(schooltype == "High School") %>%
+  select(dbn, schoolname, rr_s:p_q3b)
+
+```
+Select columns needed for analysis from `survey_d75`.
+
+```{r}
+survey_d75 <- survey_d75 %>%
+  subset(is.na(highschool)) %>%
+  select(dbn, rr_s:p_q3c)
 ```
 
