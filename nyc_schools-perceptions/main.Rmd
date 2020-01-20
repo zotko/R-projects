@@ -1,0 +1,25 @@
+---
+title: "NYC Schools Perceptions"
+author: "Mykola Zotko"
+data: "January 20, 2019"
+output: html_notebook
+
+---
+
+In this project we will work with data sets from the [New York City Department of Education](https://www.schools.nyc.gov/). They contain data on NYC schools, including student demographics, test scores, graduation and dropout rates, and school locations.
+We will incorporate some additional data from responses to surveys designed to gauge parent, student, and teacher perceptions of the quality of New York City schools. 
+
+```{r, message=FALSE}
+library(dplyr)
+library(readr)
+
+```
+Read preproceseed NYC schools data, [servey data](https://data.cityofnewyork.us/Education/2011-NYC-School-Survey/mnz3-dyi8) for all community schools and for all District 75 schools.
+
+```{r, message=FALSE}
+combined <-  read_csv('data/combined.csv')
+community <-  read_tsv('data/masterfile11_gened_final.txt')
+district75 <- read_tsv('data/masterfile11_d75_final.txt')
+
+```
+
