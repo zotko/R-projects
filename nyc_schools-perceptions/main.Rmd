@@ -12,6 +12,10 @@ We will incorporate some additional data from responses to surveys designed to g
 ```{r, message=FALSE}
 library(dplyr)
 library(readr)
+library(ggplot2)
+library(purrr)
+library(tidyr)
+library(stringr)
 
 ```
 Read preproceseed NYC schools data, [servey data](https://data.cityofnewyork.us/Education/2011-NYC-School-Survey/mnz3-dyi8) for all community schools and for all District 75 schools.
@@ -28,7 +32,7 @@ Filter `survey` data to include only high schools and select columns needed for 
 ```{r}
 survey <- survey %>%
   filter(schooltype == "High School") %>%
-  select(dbn, schoolname, rr_s:p_q3b)
+  select(dbn, rr_s:aca_tot_11)
 
 ```
 Select columns needed for analysis from `survey_d75`.
@@ -36,6 +40,96 @@ Select columns needed for analysis from `survey_d75`.
 ```{r}
 survey_d75 <- survey_d75 %>%
   subset(is.na(highschool)) %>%
-  select(dbn, rr_s:p_q3c)
+  select(dbn, rr_s:aca_tot_11)
+```
+Combine `survey` and `survey_d75` data frames.
+
+```{r}
+survey_total <- rbind(survey, survey_d75)
+```
+Rename `survey_total` variable `dbn` to `DBN` so can use as key to join with the `combined` data frame. Join the `combined` and `survey_total` data frames. Use `left_join()` to keep only survey data that correspond to schools for which we have data in `combined`.
+
+```{r}
+survey_total <- survey_total %>%
+  rename(DBN = dbn)
+
+combined_survey <- combined %>%
+  left_join(survey_total, by = "DBN")
+
+combined_survey <- combined_survey %>%
+  rename(num_of_sat_takers = `Num of SAT Test Takers`,
+         sat_math_avg_score = `SAT Math Avg. Score`,
+         total_exams_taken = `Total Exams Taken`,
+         sat_critical_reading_avg_score = `SAT Critical Reading Avg. Score`,
+         sat_writing_avg_score = `SAT Writing Avg. Score`,
+         ap_test_takers = `AP Test Takers`,
+         number_of_exames_with_3_5 = `Number of Exams with scores 3 4 or 5`)
+```
+Create a correlation matrix to look for interesting relationships between pairs of variables in the new, combined data frame.
+
+```{r}
+cor_mat <- combined_survey %>%
+  select_if(is.numeric) %>%
+  cor(use = "pairwise.complete.obs")
+
+cor_tib <- cor_mat %>%
+  as_tibble(rownames = "variable")
+
+sat_cors <- cor_tib %>%
+  select(variable, avg_sat_score) %>%
+  filter(avg_sat_score > 0.25 | avg_sat_score < 0.25)
+
+sat_cors <- sat_cors[order(sat_cors$avg_sat_score), ]
+```
+Create a bar plot of correlation between avarage SAT score and other variables.
+
+```{r}
+sat_cors$variable <- factor(sat_cors$variable, levels = sat_cors$variable)
+ggplot(data = sat_cors) +
+  aes(x = variable, y = avg_sat_score) +
+  theme(axis.text.x = element_text(angle = 90, hjust=0.95)) +
+  geom_bar(stat = "identity")
+```
+Create scatter plots to explore potentially interesting relationships between variables in greater detail.
+
+
+```{r}
+ordered_cors <- sat_cors[order(-abs(sat_cors$avg_sat_score)),]
+x_var = as.character(ordered_cors$variable[5:10])
+y_var = "avg_sat_score"
+
+create_scatter <- function (x, y) {
+  ggplot(data = combined_survey) +
+    aes_string(x = x, y = "avg_sat_score") +
+    geom_point()
+}
+
+map(x_var, create_scatter)
+```
+Reshape the data so that we can investigate differences in student, parent, and teacher responses to survey questions.
+
+```{r}
+combined_gather <- combined_survey %>%
+  select(DBN, school_name, saf_p_11:aca_tot_11) %>%
+  gather(key='survey_question', value=score, saf_p_11:aca_tot_11)
+
+combined_gather <- combined_gather %>%
+  mutate(response_type = str_sub(combined_gather$survey_question, 4, 6),
+         question = str_sub(combined_gather$survey_question, end = 3))
+
+combined_gather <- combined_gather %>%
+  mutate(response_type = ifelse(response_type == '_p_', 'parent',
+                                ifelse(response_type == '_t_', 'teacher',
+                                       ifelse(response_type == '_s_', 'student',
+                                              ifelse(response_type == '_to', 'total', 'NA')))))
+```
+Make a boxplot to see if there appear to be differences in how the three groups of responders (parents, students, and teachers) answered the four questions. 
+
+```{r}
+combined_gather %>%
+  filter(response_type != 'total') %>%
+  ggplot() +
+  aes(x = question, y = score, fill=response_type) +
+  geom_boxplot()
 ```
 
